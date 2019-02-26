@@ -124,4 +124,3 @@ int main(int argc, char *argv[]) {
     cout << string(poohbear(argv[1])) << endl;
     return 0;
 }
-
