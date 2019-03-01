@@ -1,11 +1,10 @@
 #include <string>
 #include <iostream>
 #include <cmath>
-#include <vector>
 
 using namespace std;
 
-void iterate(int n, const vector<int>& m, vector<int>* path, int climbs, int& res_climbs) {
+void iterate(int n, const int* m, int*& path, int& ip, int climbs, int& res_climbs) {
     // vector<int> temp = m;
     // cout << "path:";
     // for (int p : *path) {
@@ -19,24 +18,34 @@ void iterate(int n, const vector<int>& m, vector<int>* path, int climbs, int& re
     //     cout << char(temp[i] + 48);
     // }
     // cout << endl << "length: " << climbs << '(' << res_climbs << ')' << endl << endl;
-    int location { path->back() };
-    vector <int> neighbours;
+    int location { path[ip - 1] };
+    int neighbours[4];
+    int in { 0 };
     if (location / n != 0) {
-        neighbours.push_back(location - n);
+        neighbours[in++] = location - n;
     }
     if (location / n != n - 1) {
-        neighbours.push_back(location + n);
+        neighbours[in++] = location + n;
     }
     if (location % n != 0) {
-        neighbours.push_back(location - 1);
+        neighbours[in++] = location - 1;
     }
     if (location % n != n - 1) {
-        neighbours.push_back(location + 1);
+        neighbours[in++] = location + 1;
     }
-    for (int l : neighbours) {
+    for (int k = 0; k < in; ++k) {
+        for (int j = k + 1; j < in; ++j) {
+            if (abs(m[path[ip - 1]] - m[neighbours[j]]) < abs(m[path[ip - 1]] - m[neighbours[k]])) {
+                neighbours[k] -= neighbours[j];
+                neighbours[j] += neighbours[k];
+                neighbours[k] = neighbours[j] - neighbours[k];
+            }
+        }
+    }
+    for (int j = 0; j < in; ++j) {
         bool has_loop { false };
-        for (int i = 0; i < int(path->size()); ++i) {
-            if (path->at(i) == l) {
+        for (int i = 0; i < ip; ++i) {
+            if (path[i] == neighbours[j]) {
                 has_loop = true;
                 break;
             }
@@ -44,21 +53,21 @@ void iterate(int n, const vector<int>& m, vector<int>* path, int climbs, int& re
         if (has_loop) {
             continue;
         }
-        int delta { abs(m[l] - m[location]) };
-        if (l == n * n - 1) {
+        int delta { abs(m[neighbours[j]] - m[location]) };
+        if (neighbours[j] == n * n - 1) {
             if (climbs + delta < res_climbs) {
                 res_climbs = climbs + delta;
             }
             if (res_climbs <= 0) {
-                path->pop_back();
+                --ip;
                 return;
             }
         } else if (climbs + delta < res_climbs) {
-            path->push_back(l);
-            iterate(n, m, path, climbs + delta, res_climbs);
+            path[ip++] = neighbours[j];
+            iterate(n, m, path, ip, climbs + delta, res_climbs);
         }
     }
-    path->pop_back();
+    --ip;
 }
 
 int path_finder(string maze) {
@@ -74,9 +83,10 @@ int path_finder(string maze) {
         cerr << "Maze has invalid content: couldn't detect any newline symbol" << endl;
         return -1;
     }
-    vector <int> m;
-    vector <int> path;
-    path.push_back(0);
+    int* m = new int [n * n];
+    int* path = new int [n * n];
+    path[0] = 0;
+    int ip { 1 };
     int res_climbs { 9 * n * n };
     int im { 0 };
     for (char c : maze) {
@@ -87,27 +97,49 @@ int path_finder(string maze) {
             if(c < 48 || c > 57) {
                 break;
             }
-            m.push_back(c - 48);
-            ++im;
+            m[im++] = c - 48;
         }
     }
     if (im != n * n) {
         cerr << "Maze has invalid size or invalid content" << endl;
+        delete [] m;
+        delete [] path;
         return -1;    
     }
-    iterate(n, m, &path, 0, res_climbs);
+    iterate(n, m, path, ip, 0, res_climbs);
     
+    delete [] m;
+    delete [] path;
     return res_climbs;
 }
 
 int main() {
     string s =
-        "000000\n"
-        "000000\n"
-        "000000\n"
-        "000010\n"
-        "000109\n"
-        "001010";
+        // "000000\n"
+        // "000000\n"
+        // "000000\n"
+        // "000010\n"
+        // "000109\n"
+        // "001010";
+        // "0101010101\n"
+        // "1010101010\n"
+        // "0101010101\n"
+        // "1010101010\n"
+        // "0101010101\n"
+        // "1010101010\n"
+        // "0101010101\n"
+        // "1010101010\n"
+        // "0101010101\n"
+        // "1010101010";
+        "123456789\n"
+        "987654321\n"
+        "123456789\n"
+        "987654321\n"
+        "123456789\n"
+        "987654321\n"
+        "123456789\n"
+        "987654321\n"
+        "123456789";
     cout << path_finder(s) << endl;
     return 0;
 }
