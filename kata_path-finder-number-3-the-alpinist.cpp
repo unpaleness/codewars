@@ -5,11 +5,14 @@
 using namespace std;
 
 void iterate(int n, const int* m, int*& path, int& ip, int climbs, int& res_climbs) {
-    // vector<int> temp = m;
+    // int* temp = new int [n * n];
+    // for (int i = 0; i < n * n; ++i) {
+    //     temp[i] = m[i];
+    // }
     // cout << "path:";
-    // for (int p : *path) {
-    //     temp[p] = -2;
-    //     cout << ' ' << p;
+    // for (int i = 0; i < ip; ++i) {
+    //     temp[path[i]] = -2;
+    //     cout << ' ' << path[i];
     // }
     // for (int i = 0; i < n * n; ++i) {
     //     if (i % n == 0) {
@@ -17,6 +20,7 @@ void iterate(int n, const int* m, int*& path, int& ip, int climbs, int& res_clim
     //     }
     //     cout << char(temp[i] + 48);
     // }
+    // delete [] temp;
     // cout << endl << "length: " << climbs << '(' << res_climbs << ')' << endl << endl;
     int location { path[ip - 1] };
     int neighbours[4];
